@@ -39,7 +39,6 @@ On this cube are perfomed the two required queries (1 and 2).
 
 ### Second cube: Products 
 
-![cubes_UML](images/cubes_UML.jpg)
 
 This cube is thought to contain only the last version for all the products that have a nutrition score. This decision since we found meaningful to perform queries related to the scores and perform analysis of contributors and groups of products. In this case the cube has two shared dimensions:
 - Product shared dimension.
@@ -58,6 +57,10 @@ This is the product dimension where all the information about the product are st
 ### Shared dimension: Contributor 
 
 This is the contributor hierarchy where all the information about the contributors are stored. In this case, there is also stored the latest contribution date that could be useful for some analytics.
+
+### UML cube diagram
+
+![cubes_UML](images/cubes_UML.jpg)
 
 ## Description of the Relational model
 In the image below you can find the relational model. The only non degraded dimensions are `product_dim` (green) and `contributor_dim` (orange), so that why we only have two dimension table. Both fact table have a non-nullable Many-To-One relation to these dimensions, as illustrated in the diagram.
@@ -90,6 +93,7 @@ In this section, we describe and motivate the queries performed on the cubes, an
 
 
 2. Second predesigned query: **Number of versions per year/month of version (on rows) having/not having Nutri-Score respectively (on columns).** This query is useful for determining how many products include Nutri-Score values and determining if the number of accessible scores is rising or decreasing over time. The query is performed over the PublicationsCube and the following is a snippet of the results.
+
 ![query 2](images/query2.png)
 
 
