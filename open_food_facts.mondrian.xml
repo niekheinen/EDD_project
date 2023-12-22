@@ -1,0 +1,114 @@
+<Schema name="open_food_facts">
+  <Dimension type="StandardDimension" visible="true" highCardinality="false" name="Product">
+    <Hierarchy name="product_hierarchy" visible="true" hasAll="true" allMemberName="All Products" primaryKey="barcode">
+      <Table name="product_dim">
+      </Table>
+      <Level name="product_group" visible="true" column="product_group" type="String" uniqueMembers="true" levelType="Regular" hideMemberIf="Never">
+      </Level>
+      <Level name="product_type" visible="true" column="product_name" type="String" uniqueMembers="true" levelType="Regular" hideMemberIf="Never">
+      </Level>
+      <Level name="product" visible="true" column="barcode" type="String" uniqueMembers="true" levelType="Regular" hideMemberIf="Never">
+      </Level>
+    </Hierarchy>
+    <Hierarchy name="nova_hierarchy" visible="true" hasAll="true" allMemberName="All Nova" primaryKey="barcode">
+      <Table name="product_dim">
+      </Table>
+      <Level name="nova_group" visible="true" column="nova_group" type="String" uniqueMembers="true" levelType="Regular" hideMemberIf="Never">
+      </Level>
+      <Level name="product" visible="true" column="barcode" type="String" uniqueMembers="true" levelType="Regular" hideMemberIf="Never">
+      </Level>
+    </Hierarchy>
+    <Hierarchy name="nutrition_hierarchy" visible="true" hasAll="true" allMemberName="All Nutrition" primaryKey="barcode">
+      <Table name="product_dim">
+      </Table>
+      <Level name="nutrition_letter" visible="true" column="nutrition_letter" type="String" uniqueMembers="true" levelType="Regular" hideMemberIf="Never">
+      </Level>
+      <Level name="nutrition_score" visible="true" column="nutrition_score" uniqueMembers="false">
+      </Level>
+      <Level name="product" visible="true" column="barcode" type="String" uniqueMembers="true" levelType="Regular" hideMemberIf="Never">
+      </Level>
+    </Hierarchy>
+  </Dimension>
+  <Dimension type="StandardDimension" visible="true" highCardinality="false" name="Contributor">
+    <Hierarchy name="contributor_hierarchy" visible="true" hasAll="true" allMemberName="All Contributors" primaryKey="contributor_name">
+      <Table name="contributor_dim">
+      </Table>
+      <Level name="contributor" visible="true" column="contributor_name" type="String" uniqueMembers="true" levelType="Regular" hideMemberIf="Never">
+      </Level>
+    </Hierarchy>
+    <Hierarchy name="lastest_contribution" visible="true" hasAll="true" allMemberName="All Lastest Contributions" primaryKey="contributor_name">
+      <View alias="contributor_dim">
+        <SQL dialect="mysql">
+          <![CDATA[select contributor_name, YEAR(lastest_contribution) as year_lastest_contribution, MONTH(lastest_contribution) as month_lastest_contribution, DAY(lastest_contribution) as day_lastest_contribution
+from contributor_dim]]>
+        </SQL>
+      </View>
+      <Level name="year_lastest_contribution" visible="true" column="year_lastest_contribution" type="String" uniqueMembers="true" levelType="Regular" hideMemberIf="Never">
+      </Level>
+      <Level name="month_lastest_contribution" visible="true" column="month_lastest_contribution" type="String" uniqueMembers="false" levelType="Regular" hideMemberIf="Never">
+      </Level>
+      <Level name="day_lastest_contribution" visible="true" column="day_lastest_contribution" type="String" uniqueMembers="false" levelType="Regular" hideMemberIf="Never">
+      </Level>
+    </Hierarchy>
+  </Dimension>
+  <Cube name="Publications" visible="true" cache="true" enabled="true">
+    <View alias="publications_facts">
+      <SQL dialect="mysql">
+        <![CDATA[SELECT publication_facts.id, publication_facts.product, publication_facts.contributor, YEAR(publication_facts.date_created) AS year_created, MONTH(publication_facts.date_created) AS month_created, DAY(publication_facts.date_created) AS day_created,
+YEAR(publication_facts.date_modified) AS year_modified, MONTH(publication_facts.date_modified) AS month_modified, DAY(publication_facts.date_modified) AS day_modified, publication_facts.has_nutrition_score
+FROM publication_facts]]>
+      </SQL>
+    </View>
+    <Dimension type="TimeDimension" visible="true" highCardinality="false" name="TimeModified">
+      <Hierarchy name="time_modified" visible="true" hasAll="true" allMemberName="All Time Modified">
+        <Level name="Year" visible="true" column="year_modified" type="Numeric" uniqueMembers="true" levelType="TimeYears" hideMemberIf="Never">
+        </Level>
+        <Level name="Month" visible="true" column="month_modified" type="Numeric" uniqueMembers="false" levelType="TimeMonths" hideMemberIf="Never">
+        </Level>
+        <Level name="Day" visible="true" column="day_modified" type="Numeric" uniqueMembers="false" levelType="TimeDays" hideMemberIf="Never">
+        </Level>
+      </Hierarchy>
+    </Dimension>
+    <Dimension type="TimeDimension" visible="true" highCardinality="false" name="TimeCreated">
+      <Hierarchy name="time_created" visible="true" hasAll="true" allMemberName="All Time Created">
+        <Level name="Year" visible="true" column="year_created" type="Numeric" uniqueMembers="true" levelType="TimeYears" hideMemberIf="Never">
+        </Level>
+        <Level name="Month" visible="true" column="month_created" type="Numeric" uniqueMembers="false" levelType="TimeMonths" hideMemberIf="Never">
+        </Level>
+        <Level name="Day" visible="true" column="day_created" type="Numeric" uniqueMembers="false" levelType="TimeDays" hideMemberIf="Never">
+        </Level>
+      </Hierarchy>
+    </Dimension>
+    <DimensionUsage source="Contributor" name="Contributor" visible="true" foreignKey="contributor" highCardinality="false">
+    </DimensionUsage>
+    <DimensionUsage source="Product" name="Product" visible="true" foreignKey="product" highCardinality="false">
+    </DimensionUsage>
+    <Measure name="number_of_publications" column="id" aggregator="count" visible="true">
+    </Measure>
+    <Measure name="version_has_nutrition_score" column="has_nutrition_score" aggregator="sum" visible="true">
+    </Measure>
+  </Cube>
+  <Cube name="Product" visible="true" cache="true" enabled="true">
+    <Table name="product_facts">
+    </Table>
+    <DimensionUsage source="Product" name="Product" visible="true" foreignKey="product">
+    </DimensionUsage>
+    <DimensionUsage source="Contributor" name="Contributor" visible="true" foreignKey="contributor">
+    </DimensionUsage>
+    <Measure name="avg_score" column="score" aggregator="avg" visible="true">
+    </Measure>
+    <CalculatedMember name="avg_score_letter" dimension="Measures">
+    <Formula>
+      <![CDATA[
+        CASE
+          WHEN [Measures].[avg_score] < 0 THEN 'A'
+          WHEN [Measures].[avg_score] < 2.5 THEN 'B'
+          WHEN [Measures].[avg_score] < 10.5 THEN 'C'
+          WHEN [Measures].[avg_score] < 2 THEN 'D'
+          ELSE 'E'
+        END
+      ]]>
+    </Formula>
+  </CalculatedMember>
+  </Cube>
+</Schema>
