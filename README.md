@@ -39,6 +39,8 @@ On this cube are perfomed the two required queries (1 and 2).
 
 ### Second cube: Products 
 
+![cubes_UML](images/cubes_UML.jpg)
+
 This cube is thought to contain only the last version for all the products that have a nutrition score. This decision since we found meaningful to perform queries related to the scores and perform analysis of contributors and groups of products. In this case the cube has two shared dimensions:
 - Product shared dimension.
 - Contributor shared dimension.
@@ -60,7 +62,7 @@ This is the contributor hierarchy where all the information about the contributo
 ## Description of the Relational model
 In the image below you can find the relational model. The only non degraded dimensions are `product_dim` (green) and `contributor_dim` (orange), so that why we only have two dimension table. Both fact table have a non-nullable Many-To-One relation to these dimensions, as illustrated in the diagram.
 
-[Relational model](relational_model.png)
+![Relational model](images/relational_model.png)
 
 ## Description of data transformation step
 Instead of using Kettle, we've decided to fill all tables using raw SQL `insert into` statements. The data transformation part starts in at [line 52](https://github.com/niekheinen/EDD_project/blob/main/initialize_database.sql#L52) in the `initialize_database.sql` file. Below we will elaborate the steps taken to properly initliaze the data for every table
@@ -81,11 +83,20 @@ For this fact table we need the latest version of the product, for which we can 
 ## Queries performed
 In this section, we describe and motivate the queries performed on the cubes, and we include screenshots of their outputs.
 
-1. First assigned query: **Number of products per contributor type (on rows) and year of creation (on columns).** This query is useful since it displays the number of product created by each contributor for each year. This allows us to examine how contributions are spread over time, as well as who the most active contributors are and the development of their participation in the database over time, such as whether contributors tend to grow or reduce their provided contributions over time. The query is performed over the PublicationsCube and the following is a snippet of the results. <figure class='images'><img src="images/query1.png" width="700" height="450"></figure>
+1. First assigned query: **Number of products per contributor type (on rows) and year of creation (on columns).** This query is useful since it displays the number of product created by each contributor for each year. This allows us to examine how contributions are spread over time, as well as who the most active contributors are and the development of their participation in the database over time, such as whether contributors tend to grow or reduce their provided contributions over time. The query is performed over the PublicationsCube and the following is a snippet of the results. 
 
-2. Second predesigned query: **Number of versions per year/month of version (on rows) having/not having Nutri-Score respectively (on columns).** This query is useful for determining how many products include Nutri-Score values and determining if the number of accessible scores is rising or decreasing over time. The query is performed over the PublicationsCube and the following is a snippet of the results. <figure class='images'><img src="images/query2.png" width="500" height="450"></figure>
+![query 1](images/query1.png)
 
-3. First additional query: **Average nutrition score and letter (on columns) for each product group (on rows).** This query calculates the average nutrition score and relative letter for each product group. In this way, it is possible to see which are the most unhealthy and healthy groups. <figure class='images'><img src="images/query3.png" width="500" height="450"></figure>
 
-4. Second additional query:  **Average nutrition score and letter (on columns) for each contributor (on rows).** This query calculates the average nutrition score and relative letter for each contributor. In this way, it is possible to analyze the contributors that published the most unhealthy products and the most healthy ones. In the result, it is shown the relevant contributors (#products > 20) that have the highest average. <figure class='images'><img src="images/query4.png" width="500" height="300"></figure>
 
+2. Second predesigned query: **Number of versions per year/month of version (on rows) having/not having Nutri-Score respectively (on columns).** This query is useful for determining how many products include Nutri-Score values and determining if the number of accessible scores is rising or decreasing over time. The query is performed over the PublicationsCube and the following is a snippet of the results.
+![query 2](images/query2.png)
+
+
+3. First additional query: **Average nutrition score and letter (on columns) for each product group (on rows).** This query calculates the average nutrition score and relative letter for each product group. In this way, it is possible to see which are the most unhealthy and healthy groups. 
+
+![query 3](images/query3.png)
+
+4. Second additional query:  **Average nutrition score and letter (on columns) for each contributor (on rows).** This query calculates the average nutrition score and relative letter for each contributor. In this way, it is possible to analyze the contributors that published the most unhealthy products and the most healthy ones. In the result, it is shown the relevant contributors (#products > 20) that have the highest average. 
+
+![query 4](images/query4.png)
