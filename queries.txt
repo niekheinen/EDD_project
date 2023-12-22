@@ -1,0 +1,21 @@
+FIRST QUERY:
+select [TimeCreated.time_created].[Year].Members ON COLUMNS,
+  Order(Crossjoin([Contributor.contributor_hierarchy].Members, {[Measures].[distinct_count_products]}), [Measures].[distinct_count_products], DESC) ON ROWS
+from [Publications]
+
+
+Second QUERY:
+with member [Measures].[version_has_no_score] as '([Measures].[number_of_publications] - [Measures].[version_has_nutrition_score])'
+select {[Measures].[version_has_nutrition_score], [Measures].[version_has_no_score]} ON COLUMNS,
+  [TimeModified.time_modified].[Month].Members ON ROWS
+from [Publications]
+
+Third query:
+select {[Measures].[avg_score], [Measures].[avg_score_letter]} ON COLUMNS,
+  [Product.product_hierarchy].[product_group].Members ON ROWS
+from [Product]
+
+Fourth query:
+select {[Measures].[avg_score], [Measures].[avg_score_letter]} ON COLUMNS,
+  TopCount(Filter([Contributor.contributor_hierarchy].Members, ([Measures].[product_count] > 20)), 10, [Measures].[avg_score]) ON ROWS
+from [Product]

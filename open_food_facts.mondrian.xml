@@ -23,7 +23,7 @@
       </Table>
       <Level name="nutrition_letter" visible="true" column="nutrition_letter" type="String" uniqueMembers="true" levelType="Regular" hideMemberIf="Never">
       </Level>
-      <Level name="nutrition_score" visible="true" column="nutrition_score" uniqueMembers="false">
+      <Level name="nutrition_score" visible="true" column="nutrition_score" type="String" uniqueMembers="false" levelType="Regular" hideMemberIf="Never">
       </Level>
       <Level name="product" visible="true" column="barcode" type="String" uniqueMembers="true" levelType="Regular" hideMemberIf="Never">
       </Level>
@@ -34,20 +34,6 @@
       <Table name="contributor_dim">
       </Table>
       <Level name="contributor" visible="true" column="contributor_name" type="String" uniqueMembers="true" levelType="Regular" hideMemberIf="Never">
-      </Level>
-    </Hierarchy>
-    <Hierarchy name="lastest_contribution" visible="true" hasAll="true" allMemberName="All Lastest Contributions" primaryKey="contributor_name">
-      <View alias="contributor_dim">
-        <SQL dialect="mysql">
-          <![CDATA[select contributor_name, YEAR(lastest_contribution) as year_lastest_contribution, MONTH(lastest_contribution) as month_lastest_contribution, DAY(lastest_contribution) as day_lastest_contribution
-from contributor_dim]]>
-        </SQL>
-      </View>
-      <Level name="year_lastest_contribution" visible="true" column="year_lastest_contribution" type="String" uniqueMembers="true" levelType="Regular" hideMemberIf="Never">
-      </Level>
-      <Level name="month_lastest_contribution" visible="true" column="month_lastest_contribution" type="String" uniqueMembers="false" levelType="Regular" hideMemberIf="Never">
-      </Level>
-      <Level name="day_lastest_contribution" visible="true" column="day_lastest_contribution" type="String" uniqueMembers="false" levelType="Regular" hideMemberIf="Never">
       </Level>
     </Hierarchy>
   </Dimension>
@@ -87,28 +73,30 @@ FROM publication_facts]]>
     </Measure>
     <Measure name="version_has_nutrition_score" column="has_nutrition_score" aggregator="sum" visible="true">
     </Measure>
+    <Measure name="distinct_count_products" column="product" aggregator="distinct-count" visible="true">
+    </Measure>
   </Cube>
   <Cube name="Product" visible="true" cache="true" enabled="true">
     <Table name="product_facts">
     </Table>
-    <DimensionUsage source="Product" name="Product" visible="true" foreignKey="product">
+    <DimensionUsage source="Product" name="Product" visible="true" foreignKey="product" highCardinality="false">
     </DimensionUsage>
-    <DimensionUsage source="Contributor" name="Contributor" visible="true" foreignKey="contributor">
+    <DimensionUsage source="Contributor" name="Contributor" visible="true" foreignKey="contributor" highCardinality="false">
     </DimensionUsage>
     <Measure name="avg_score" column="score" aggregator="avg" visible="true">
     </Measure>
+    <Measure name="product_count" column="product" aggregator="distinct-count" visible="true">
+    </Measure>
     <CalculatedMember name="avg_score_letter" dimension="Measures">
-    <Formula>
-      <![CDATA[
-        CASE
+      <Formula>
+        <![CDATA[CASE
           WHEN [Measures].[avg_score] < 0 THEN 'A'
           WHEN [Measures].[avg_score] < 2.5 THEN 'B'
           WHEN [Measures].[avg_score] < 10.5 THEN 'C'
-          WHEN [Measures].[avg_score] < 2 THEN 'D'
+          WHEN [Measures].[avg_score] < 18 THEN 'D'
           ELSE 'E'
-        END
-      ]]>
-    </Formula>
-  </CalculatedMember>
+        END]]>
+      </Formula>
+    </CalculatedMember>
   </Cube>
 </Schema>
