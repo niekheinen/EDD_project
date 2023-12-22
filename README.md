@@ -58,8 +58,25 @@ This is the product dimension where all the information about the product are st
 This is the contributor hierarchy where all the information about the contributors are stored. In this case, there is also stored the latest contribution date that could be useful for some analytics.
 
 ## Description of the Relational model
+In the image below you can find the relational model. The only non degraded dimensions are `product_dim` (green) and `contributor_dim` (orange), so that why we only have two dimension table. Both fact table have a non-nullable Many-To-One relation to these dimensions, as illustrated in the diagram.
+
+[Relational model](relational_model.png)
 
 ## Description of data transformation step
+Instead of using Kettle, we've decided to fill all tables using raw SQL `insert into` statements. The data transformation part starts in at [line 52](https://github.com/niekheinen/EDD_project/blob/main/initialize_database.sql#L52) in the `initialize_database.sql` file. Below we will elaborate the steps taken to properly initliaze the data for every table
+
+#### `product_dim`
+To fill the product table, we need the latest instance of every product. To do so, we first created a subquery that gets the latest modification date for every product. We then do an inner join on the original product version table (i.e. `OFF_2_version_produit`) to select the latest version. After that we simple select the attributes we want and give them some better names.
+
+#### `contributor_dim`
+Filling this dimension is rather simple, as we just need all unique values of `OFF_2_version_produit.pseudo`, we've decided to rename this value to `contributor_name` for clarity.
+
+#### `publication_facts`
+Filling this fact table is rather simple, as it it's basically modeled after the original product version table (i.e. `OFF_2_version_produit`). We simply do a select on that table, and apply our renaming. The only extra column we added is `has_nutrition_score`, this columns contains a boolean value (`0` for false, `1` for true) that indicates wheter or not this specific column has a nutrition score defined.
+
+#### `product_facts`
+For this fact table we need the latest version of the product, for which we can use the previously created `product_dim`, and we need to append it with the latest contributor of this product. We use a similar technique as used in filling the data for `product_dim`.
+
 
 ## Queries performed
 In this section, we describe and motivate the queries performed on the cubes, and we include screenshots of their outputs.
