@@ -70,9 +70,9 @@ inner join (
 
 -- Contributor dimension (is shared)
 insert into base_mvitali.contributor_dim(contributor_name)
-select c.pseudo as contributor_name
-from base_bousse.OFF_2_contributeur as c left join base_bousse.OFF_2_version_produit as pv on c.pseudo = pv.pseudo
-group by c.pseudo;
+select pseudo as contributor_name
+from base_bousse.OFF_2_contributeur
+group by pseudo;
 
 -- Publication fact table
 insert into base_mvitali.publication_facts(contributor, product, date_created, date_modified, has_nutrition_score)
