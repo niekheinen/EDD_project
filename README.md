@@ -5,17 +5,16 @@ The goal of the project is to understand and put in practice the workflow of an 
 The steps of the worflow are the following:
 1. Extract data from external sources and store it in a Data Warehouse: our Data Warehouse is given by the 3 databases OFF_2_contributeur, OFF_2_pnns, and OFF_2_version_produit. The data is available on phpMyAdmin.
 2. Design the UML schema of the multidimensional model we adopted.
-3. Write the XML code that represents the multidimensional Mondrian schema chosen to represent our data. The code is written using the Schema Workbench interface.
+3. Write the XML code that represents the multidimensional Mondrian schema chosen to represent our multidimensional model. The code is written using the Schema Workbench interface.
 4. Define the relational model of the supporting database.
-5. Write the SQL script to create the supporting database, i.e. our Data Mart.
+5. Write the SQL script to create the supporting database.
 6. Transform the data to fill the dimensional and fact tables with Kettle or SQL.
 7. Write the MDX code for the selected queries on Pentaho Server.
 8. Run the queries using JPivot on Pentaho Server and analyze the result.
 
 The original database is the Open Food Facts database which contains records posted by contributors regarding food products sold in supermarkets. Products are associated with categories and also with different nutritional scores. The products can have multiple versions, i.e. contributors can update over time the data regarding one product. In this case, we have multiple records related to the same product with different modification dates. Each record contains the creation date of the first record related to that product, and the modification date related to that specific record.
 
-The project description required us to design the multidimensional schema of two Mondrian cubes and then to run queries on those cubes. We had to run two predesigned queries on that schema.
-Then, we were required to design and run some additional queries of our choice on a newly designed cube.
+The project required us to design the multidimensional schema of two Mondrian cubes and then run queries on those cubes. Then, four different queries should be run on the two cubes.
 
 ## Files contained in the GIT repository
 In this GIT repository you will find the following files:
@@ -25,6 +24,7 @@ In this GIT repository you will find the following files:
 - SQL code to generate the supporting database
 - Kettle/SQL file to fill the data into the dimensional and fact tables
 - MDX code of the performed queries.
+- Images of the query results.
 
 ## Description of the UML diagram
 ### First cube: Publications 
@@ -33,9 +33,9 @@ The idea of this cube is to contain all the versions for each product in the dat
 - Product shared dimension.
 - Contributor shared dimension.
   
-And three different measures used to perform the required queries.
-The cube has also two degraded time dimensions. A view is used to take the year, month and day from the creation and modification datetime column.
-On this cube are perfomed the two required queries (1 and 2).
+And three different measures were used to perform the required queries.
+The cube has also two degraded time dimensions. A view is used to take the year, month and day from the creation and modification date-time column.
+On this cube are performed the two required queries (1 and 2).
 
 ### Second cube: Products 
 
@@ -57,13 +57,15 @@ This is the product dimension where all the information about the product are st
 ### Shared dimension: Contributor 
 
 This is the contributor hierarchy where all the information about the contributors are stored. In this case, there is also stored the latest contribution date that could be useful for some analytics.
+In this case, the dimension could be degraded. However, we decided to keep it split due to ease of understanding and since in the future might be the need to add more contributors' information.
 
 ### UML cube diagram
 
 ![cubes_UML](images/cubes_UML.jpg)
 
 ## Description of the Relational model
-In the image below you can find the relational model. The only non degraded dimensions are `product_dim` (green) and `contributor_dim` (orange), so that why we only have two dimension table. Both fact table have a non-nullable Many-To-One relation to these dimensions, as illustrated in the diagram.
+In the image below you can find the relational model. The only non-degraded dimensions are `product_dim` (green) and `contributor_dim` (orange), so that is why we only have two dimension tables. Both fact tables have a non-nullable Many-To-One relation to these dimensions, as illustrated in the diagram.
+As seen in theory, each cube is mapped into a fact table while each non-degraded dimension is mapped into a dimensional table.
 
 ![Relational model](images/relational_model.png)
 
@@ -71,16 +73,16 @@ In the image below you can find the relational model. The only non degraded dime
 Instead of using Kettle, we've decided to fill all tables using raw SQL `insert into` statements. The data transformation part starts in at [line 52](https://github.com/niekheinen/EDD_project/blob/main/initialize_database.sql#L52) in the `initialize_database.sql` file. Below we will elaborate the steps taken to properly initliaze the data for every table
 
 #### `product_dim`
-To fill the product table, we need the latest instance of every product. To do so, we first created a subquery that gets the latest modification date for every product. We then do an inner join on the original product version table (i.e. `OFF_2_version_produit`) to select the latest version. After that we simple select the attributes we want and give them some better names.
+To fill the product table, we need the latest instance of every product. To do so, we first created a subquery that gets the latest modification date for every product. We then do an inner join on the original product version table (i.e. `OFF_2_version_produit`) to select the latest version. After that, we simply select the attributes we want and give them some better names.
 
 #### `contributor_dim`
 Filling this dimension is rather simple, as we just need all unique values of `OFF_2_contributeur.pseudo`, we've decided to rename this value to `contributor_name` for clarity.
 
 #### `publication_facts`
-Filling this fact table is rather simple, as it it's basically modeled after the original product version table (i.e. `OFF_2_version_produit`). We simply do a select on that table, and apply our renaming. The only extra column we added is `has_nutrition_score`, this columns contains a boolean value (`0` for false, `1` for true) that indicates wheter or not this specific column has a nutrition score defined.
+Filling this fact table is rather simple, as it is basically modeled after the original product version table (i.e. `OFF_2_version_produit`). We do a select on that table and apply our renaming. The only extra column we added is `has_nutrition_score`, this column contains a boolean value (`0` for false, `1` for true) that indicates whether or not this specific column has a nutrition score defined.
 
 #### `product_facts`
-For this fact table we need the latest version of the product, for which we can use the previously created `product_dim`, and we need to append it with the latest contributor of this product. We use a similar technique as used in filling the data for `product_dim`.
+For this fact table, we need the latest version of the product, for which we can use the previously created `product_dim`, and we need to append it with the latest contributor of this product. We use a similar technique as used in filling the data for `product_dim`.
 
 
 ## Queries performed
@@ -104,3 +106,5 @@ In this section, we describe and motivate the queries performed on the cubes, an
 4. Second additional query:  **Average nutrition score and letter (on columns) for each contributor (on rows).** This query calculates the average nutrition score and relative letter for each contributor. In this way, it is possible to analyze the contributors that published the most unhealthy products and the most healthy ones. In the result, it is shown the relevant contributors (#products > 20) that have the highest average. 
 
 ![query 4](images/query4.png)
+
+All the query results have been checked with the relative SQL code run over the BaseBousse to see if they were working correctly. Since the results are positive, we can say that the data insertion is correctly working to structure the data into our database, and also the Mondrian schema is correctly working.
