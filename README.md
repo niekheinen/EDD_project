@@ -30,8 +30,8 @@ In this GIT repository you will find the following files:
 ### First cube: Publications 
 
 The idea of this cube is to contain all the versions for each product in the data warehouse and perform analysis on them. It is composed of:
-- Product shared dimension.
-- Contributor shared dimension.
+- **Product shared dimension.**
+- **Contributor shared dimension.**
   
 And three different measures were used to perform the required queries.
 The cube has also two degraded time dimensions. A view is used to take the year, month and day from the creation and modification date-time column.
@@ -41,8 +41,8 @@ On this cube are performed the two required queries (1 and 2).
 
 
 This cube is thought to contain only the last version for all the products that have a nutrition score. This decision since we found meaningful to perform queries related to the scores and perform analysis of contributors and groups of products. In this case the cube has two shared dimensions:
-- Product shared dimension.
-- Contributor shared dimension.
+- **Product shared dimension.**
+- **Contributor shared dimension.**
 
 And also two measures and a calculated member. The latter is a formula to map the average nutrition scores to the relative nutrition letter.
 On this cube are performed queries 3 and 4.
@@ -50,9 +50,9 @@ On this cube are performed queries 3 and 4.
 ### Shared dimension: Product 
 
 This is the product dimension where all the information about the product are stored. It is composed of three different hierarchies:
-1. Product hierarchy: it contains all the information about the product name, product group and barcode.
-2. Nova hierarchy: it contains all the information about the nova group.
-3. Nutrition hierarchy: it contains all the information related to nutrition scores and letters.
+1. **Product hierarchy:** it contains all the information about the product name, product group and barcode.
+2. **Nova hierarchy:** it contains all the information about the nova group.
+3. **Nutrition hierarchy:** it contains all the information related to nutrition scores and letters.
 
 ### Shared dimension: Contributor 
 
