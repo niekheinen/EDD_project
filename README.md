@@ -74,7 +74,7 @@ Instead of using Kettle, we've decided to fill all tables using raw SQL `insert 
 To fill the product table, we need the latest instance of every product. To do so, we first created a subquery that gets the latest modification date for every product. We then do an inner join on the original product version table (i.e. `OFF_2_version_produit`) to select the latest version. After that we simple select the attributes we want and give them some better names.
 
 #### `contributor_dim`
-Filling this dimension is rather simple, as we just need all unique values of `OFF_2_version_produit.pseudo`, we've decided to rename this value to `contributor_name` for clarity.
+Filling this dimension is rather simple, as we just need all unique values of `OFF_2_contributeur.pseudo`, we've decided to rename this value to `contributor_name` for clarity.
 
 #### `publication_facts`
 Filling this fact table is rather simple, as it it's basically modeled after the original product version table (i.e. `OFF_2_version_produit`). We simply do a select on that table, and apply our renaming. The only extra column we added is `has_nutrition_score`, this columns contains a boolean value (`0` for false, `1` for true) that indicates wheter or not this specific column has a nutrition score defined.
